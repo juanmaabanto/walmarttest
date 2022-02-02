@@ -1,0 +1,74 @@
+package ports
+
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/go-playground/validator"
+	"github.com/juanmaabanto/go-seedwork/seedwork/errors"
+	"github.com/juanmaabanto/ms-products/internal/application"
+	"github.com/juanmaabanto/ms-products/internal/application/command"
+	"github.com/labstack/echo/v4"
+)
+
+type HttpServer struct {
+	app application.Application
+}
+
+func NewHttpServer(application application.Application) HttpServer {
+	return HttpServer{
+		app: application,
+	}
+}
+
+// CreateProduct godoc
+// @Summary Create a new product.
+// @Tags Products
+// @Accept json
+// @Produce json
+// @Param command body products.Product true "Object to be created."
+// @Success 201 {string} string "Id of the created object"
+// @Failure 400 {object} responses.ErrorResponse
+// @Failure 422 {object} responses.ErrorResponse
+// @Failure 500 {object} responses.ErrorResponse
+// @Router /api/v1/products [post]
+func (h HttpServer) AddProduct(c echo.Context) error {
+	item := command.CreateProduct{}
+
+	if err := c.Bind(&item); err != nil {
+		fmt.Println(err)
+		panic(err)
+	}
+
+	if err := c.Validate(item); err != nil {
+		validationErrors := err.(validator.ValidationErrors)
+		panic(errors.NewValidationError(Simple(validationErrors)))
+	}
+
+	id, err := h.app.Commands.CreateProduct.Handle(c.Request().Context(), item)
+
+	if err != nil {
+		// return c.JSON(http.StatusBadRequest, err.Error())
+		panic(err)
+	}
+
+	// create a response
+	//return success response
+	c.Response().Header().Set("location", c.Request().URL.String()+"/"+id)
+
+	return c.JSON(http.StatusCreated, id)
+}
+
+func Simple(verr validator.ValidationErrors) map[string]string {
+	errs := make(map[string]string)
+
+	for _, f := range verr {
+		err := f.ActualTag()
+		if f.Param() != "" {
+			err = fmt.Sprintf("%s=%s", err, f.Param())
+		}
+		errs[f.Field()] = err
+	}
+
+	return errs
+}

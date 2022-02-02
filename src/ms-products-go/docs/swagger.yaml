@@ -1,0 +1,83 @@
+definitions:
+  products.Product:
+    properties:
+      brand:
+        type: string
+      createdAt:
+        type: string
+      createdBy:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      modifiedAt:
+        type: string
+      modifiedBy:
+        type: string
+      price:
+        type: integer
+    type: object
+  responses.ErrorResponse:
+    properties:
+      errorId:
+        type: string
+      errors:
+        additionalProperties:
+          type: string
+        type: object
+      message:
+        type: string
+      status:
+        type: integer
+      title:
+        type: string
+    type: object
+info:
+  contact:
+    email: jmanuelabanto@gmail.com
+    name: Juan Manuel Abanto Mera
+    url: https://www.linkedin.com/in/juanmanuelabanto/
+  description: Specifying services for micro service Product.
+  license:
+    name: MIT License
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Product API
+  version: v1
+paths:
+  /api/v1/products:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Object to be created.
+        in: body
+        name: command
+        required: true
+        schema:
+          $ref: '#/definitions/products.Product'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Id of the created object
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      summary: Create a new product.
+      tags:
+      - Products
+swagger: "2.0"
