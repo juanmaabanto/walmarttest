@@ -3,11 +3,13 @@ package ports
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/go-playground/validator"
 	"github.com/juanmaabanto/go-seedwork/seedwork/errors"
 	"github.com/juanmaabanto/ms-products/internal/application"
 	"github.com/juanmaabanto/ms-products/internal/application/command"
+	"github.com/juanmaabanto/ms-products/internal/application/query"
 	"github.com/labstack/echo/v4"
 )
 
@@ -48,15 +50,39 @@ func (h HttpServer) AddProduct(c echo.Context) error {
 	id, err := h.app.Commands.CreateProduct.Handle(c.Request().Context(), item)
 
 	if err != nil {
-		// return c.JSON(http.StatusBadRequest, err.Error())
 		panic(err)
 	}
 
-	// create a response
-	//return success response
 	c.Response().Header().Set("location", c.Request().URL.String()+"/"+id)
 
 	return c.JSON(http.StatusCreated, id)
+}
+
+// GetProduct godoc
+// @Summary Get a product by Id.
+// @Tags Products
+// @Accept json
+// @Produce json
+// @Param id path string  true  "Product Id"
+// @Success 200 {object} response.ProductResponse
+// @Failure 400 {object} responses.ErrorResponse
+// @Failure 404 {object} responses.ErrorResponse
+// @Failure 500 {object} responses.ErrorResponse
+// @Router /api/v1/products/{id} [get]
+func (h HttpServer) GetProduct(c echo.Context) error {
+	id, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		panic(errors.NewBadRequestError("El id no es válido"))
+	}
+
+	item, err := h.app.Queries.GetProductById.Handle(c.Request().Context(), query.GetProductById{Id: int64(id)})
+
+	if err != nil {
+		panic(err)
+	}
+
+	return c.JSON(http.StatusOK, item)
 }
 
 func Simple(verr validator.ValidationErrors) map[string]string {

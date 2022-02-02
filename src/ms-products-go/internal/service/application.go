@@ -7,6 +7,7 @@ import (
 	"github.com/juanmaabanto/go-seedwork/seedwork/database"
 	"github.com/juanmaabanto/ms-products/internal/application"
 	"github.com/juanmaabanto/ms-products/internal/application/command"
+	"github.com/juanmaabanto/ms-products/internal/application/query"
 	"github.com/juanmaabanto/ms-products/internal/domain/products"
 	"github.com/juanmaabanto/ms-products/internal/infrastructure"
 )
@@ -20,6 +21,9 @@ func NewApplication(ctx context.Context) application.Application {
 	return application.Application{
 		Commands: application.Commands{
 			CreateProduct: command.NewCreateProductHandler(productRepository),
+		},
+		Queries: application.Queries{
+			GetProductById: query.NewGetProductByIdHandler(productRepository),
 		},
 	}
 }

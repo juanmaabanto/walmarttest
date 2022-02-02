@@ -38,11 +38,12 @@ func main() {
 	application := service.NewApplication(ctx)
 
 	Handler(ports.NewHttpServer(application), router)
-	router.Logger.Fatal(router.Start(":3000"))
+	router.Logger.Fatal(router.Start(":5500"))
 }
 
 type ServerInterface interface {
 	AddProduct(c echo.Context) error
+	GetProduct(c echo.Context) error
 }
 
 func Handler(si ServerInterface, router *echo.Echo) {
@@ -63,6 +64,7 @@ func Handler(si ServerInterface, router *echo.Echo) {
 	//Swagger
 	router.GET("/*", echoSwagger.WrapHandler)
 
-	//measureType
+	//products
+	api.GET("/products/:id", si.GetProduct)
 	api.POST("/products", si.AddProduct)
 }

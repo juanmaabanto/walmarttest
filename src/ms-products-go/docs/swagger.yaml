@@ -80,4 +80,36 @@ paths:
       summary: Create a new product.
       tags:
       - Products
+  /api/v1/products/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Product Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/products.Product'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      summary: Get a product by Id.
+      tags:
+      - Products
 swagger: "2.0"
