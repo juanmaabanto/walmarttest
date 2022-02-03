@@ -1,4 +1,5 @@
 # walmarttest
+Backend desarrollado con Go 1.17, y frontend desarrollado con React JS, BD MongoDB
 
 ## Instalación
 
