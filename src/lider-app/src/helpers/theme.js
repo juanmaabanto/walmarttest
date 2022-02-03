@@ -51,7 +51,7 @@ const themes = {
     default: createTheme({
         palette: {
             primary: {
-                main: '#7367f0'
+                main: '#0071dc'
             }
         },
         components: theme.components,
