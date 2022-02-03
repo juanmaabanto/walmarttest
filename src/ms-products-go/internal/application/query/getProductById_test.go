@@ -11,11 +11,8 @@ import (
 	"github.com/juanmaabanto/ms-products/internal/infrastructure"
 )
 
-var (
-	mongo_url = "mongodb+srv://root:A123a@develop.oh3sr.mongodb.net/test?retryWrites=true&w=majority"
-)
-
 func TestGetProductByIdHandler_Handle(t *testing.T) {
+	mongo_url := "mongodb+srv://root:A123a@develop.oh3sr.mongodb.net/test?retryWrites=true&w=majority"
 	expected := &response.ProductResponse{
 		Id:           100,
 		Brand:        "qeiydij",

@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/juanmaabanto/go-seedwork/seedwork/errors"
+	"github.com/juanmaabanto/go-seedwork/seedwork/responses"
 	"github.com/juanmaabanto/ms-products/internal/application"
 	"github.com/juanmaabanto/ms-products/internal/application/command"
 	"github.com/juanmaabanto/ms-products/internal/application/query"
@@ -83,6 +84,50 @@ func (h HttpServer) GetProduct(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, item)
+}
+
+// ListProduct godoc
+// @Summary Return a Product List.
+// @Tags Products
+// @Accept json
+// @Produce json
+// @Param search query string  true  "Palabra a buscar"
+// @Param pageSize query int  true  "Número de resultados por página"
+// @Param start query string  true  "Número de página"
+// @Success 200 {object} responses.PaginatedResponse
+// @Failure 400 {object} responses.ErrorResponse
+// @Failure 500 {object} responses.ErrorResponse
+// @Router /api/v1/products [get]
+func (h HttpServer) ListProduct(c echo.Context) error {
+	searchParam := c.QueryParam("search")
+	pageSize, err := strconv.Atoi(c.QueryParam("pageSize"))
+
+	if err != nil {
+		pageSize = 50
+	}
+
+	start, err := strconv.Atoi(c.QueryParam("start"))
+
+	if err != nil {
+		start = 0
+	}
+
+	total, items, err := h.app.Queries.FindProducts.Handle(c.Request().Context(), query.FindProducts{
+		Search:   searchParam,
+		Start:    int64(start),
+		PageSize: int64(pageSize),
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	return c.JSON(http.StatusOK, responses.PaginatedResponse{
+		Start:    int64(start),
+		PageSize: int64(pageSize),
+		Total:    total,
+		Data:     items,
+	})
 }
 
 func Simple(verr validator.ValidationErrors) map[string]string {

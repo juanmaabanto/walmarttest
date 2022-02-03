@@ -10,12 +10,27 @@ definitions:
       description:
         type: string
       id:
-        type: string
+        type: integer
       image:
         type: string
       modifiedAt:
         type: string
       modifiedBy:
+        type: string
+      price:
+        type: integer
+    type: object
+  response.ProductResponse:
+    properties:
+      brand:
+        type: string
+      conDescuento:
+        type: boolean
+      description:
+        type: string
+      id:
+        type: integer
+      image:
         type: string
       price:
         type: integer
@@ -35,6 +50,16 @@ definitions:
       title:
         type: string
     type: object
+  responses.PaginatedResponse:
+    properties:
+      data: {}
+      pageSize:
+        type: integer
+      start:
+        type: integer
+      total:
+        type: integer
+    type: object
 info:
   contact:
     email: jmanuelabanto@gmail.com
@@ -48,6 +73,43 @@ info:
   version: v1
 paths:
   /api/v1/products:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Palabra a buscar
+        in: query
+        name: search
+        required: true
+        type: string
+      - description: Número de resultados por página
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      - description: Número de página
+        in: query
+        name: start
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.PaginatedResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      summary: Return a Product List.
+      tags:
+      - Products
     post:
       consumes:
       - application/json
@@ -96,7 +158,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/products.Product'
+            $ref: '#/definitions/response.ProductResponse'
         "400":
           description: Bad Request
           schema:

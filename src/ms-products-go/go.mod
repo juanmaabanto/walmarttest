@@ -6,7 +6,7 @@ require (
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/google/uuid v1.3.0
 	github.com/joho/godotenv v1.4.0
-	github.com/juanmaabanto/go-seedwork v0.0.0-20220202190131-46401fc50ed9
+	github.com/juanmaabanto/go-seedwork v0.0.0-20220203040142-92068def9e32
 	github.com/labstack/echo/v4 v4.6.3
 	github.com/swaggo/echo-swagger v1.2.0
 	github.com/swaggo/swag v1.7.8

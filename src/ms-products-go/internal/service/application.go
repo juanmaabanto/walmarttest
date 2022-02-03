@@ -23,6 +23,7 @@ func NewApplication(ctx context.Context) application.Application {
 			CreateProduct: command.NewCreateProductHandler(productRepository),
 		},
 		Queries: application.Queries{
+			FindProducts:   query.NewFindProductsHandler(productRepository),
 			GetProductById: query.NewGetProductByIdHandler(productRepository),
 		},
 	}

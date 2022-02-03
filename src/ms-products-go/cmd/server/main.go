@@ -44,6 +44,7 @@ func main() {
 type ServerInterface interface {
 	AddProduct(c echo.Context) error
 	GetProduct(c echo.Context) error
+	ListProduct(c echo.Context) error
 }
 
 func Handler(si ServerInterface, router *echo.Echo) {
@@ -65,6 +66,7 @@ func Handler(si ServerInterface, router *echo.Echo) {
 	router.GET("/*", echoSwagger.WrapHandler)
 
 	//products
+	api.GET("/products", si.ListProduct)
 	api.GET("/products/:id", si.GetProduct)
 	api.POST("/products", si.AddProduct)
 }
