@@ -9,7 +9,7 @@ const Home = ({ route }) => {
             display: 'flex',
             flexDirection: 'column',
             fontSize: { xs: 10, sm: 20, md: 30, lg: 40, xl: 50 },
-            margin: '100px 0',
+            margin: '48px 0',
             minHeight: '100%'
           }}>
             <Box sx={{
