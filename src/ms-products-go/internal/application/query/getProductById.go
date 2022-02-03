@@ -2,7 +2,6 @@ package query
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
 	"github.com/juanmaabanto/go-seedwork/seedwork/errors"
@@ -30,10 +29,6 @@ func NewGetProductByIdHandler(repo products.Repository) GetProductByIdHandler {
 func (h GetProductByIdHandler) Handle(ctx context.Context, query GetProductById) (*response.ProductResponse, error) {
 	result := &products.Product{}
 	err := h.repo.FindById(ctx, query.Id, result)
-
-	fmt.Println(result)
-	fmt.Println("query")
-	fmt.Println(err)
 
 	if result.Id == 0 {
 		return nil, errors.NewNotFoundError("No se encontro el producto por el Id")

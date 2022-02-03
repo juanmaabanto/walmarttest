@@ -1,11 +1,15 @@
 // import { productApiUrl } from '../config';
 import axios from 'axios';
-import React, { useReducer, useRef } from 'react';
+import React, { useEffect, useReducer, useRef } from 'react';
+import Badge from '@mui/material/Badge';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
+import CircularProgress from '@mui/material/CircularProgress';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Link from '@mui/material/Link';
+import Pagination from '@mui/material/Pagination';
+import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
@@ -14,9 +18,10 @@ export const initialState = {
     search: '',
     porId: false,
     data: [],
-    total: 0,
+    total: -1,
     pageSize: 10,
-    start: 0
+    start: 0,
+    isLoading: false
 };
 
 export const reducer = (state, action) => {
@@ -31,14 +36,35 @@ export const reducer = (state, action) => {
                 ...state,
                 [action.key]: action.value
             };
+        case 'change-page':
+            return {
+                ...state,
+                start: action.start
+            };
+        case 'fetch-start':
+            return {
+                ...state,
+                data: [],
+                isLoading: true,
+                total: 0
+            };
+        case 'fetch-error':
+            return {
+                ...state,
+                data: [],
+                isLoading: false,
+                total: 0,
+                error: action.error
+            };
         case 'fetch-finish':
             return {
                 ...state,
                 data: action.data,
+                isLoading: false,
                 total: action.total,
                 pageSize: action.pageSize,
                 start: action.start
-            }
+            };
         default:
             return state;
     }
@@ -49,17 +75,33 @@ const Catalog = ({ route }) => {
     const [state, dispatch] = useReducer(reducer, initialState);
     const inputEl = useRef(null);
 
+    useEffect(() => {
+        if(state.total >= 0) {
+            fetchProducts();
+        }
+    // eslint-disable-next-line
+    }, [state.start])
+
     const onFieldChange = event => {
         dispatch({ type: 'field', key: event.target.name, value: event.target.value });
     };
 
+    const handlePageChange = (event, value) => {
+        console.log(parseInt((value - 1)*state.pageSize))
+        dispatch({ type: 'change-page', start: parseInt((value - 1)*state.pageSize) });
+    };
+
     const fetchProducts = async () => {
-        if(state.search.trim() === '' || state.search.trim().length < 3 ) {
+        if (state.isLoading) {
+            return;
+        }
+        if(state.search.trim() === '' || (state.search.trim().length < 3 && !state.porId) ) {
             dispatch({ type: 'error', error: 'Ingreso al menos 3 caracteres' });
             return;
         }
 
         dispatch({ type: 'error', error: '' });
+        dispatch({ type: 'fetch-start' })
 
         try {
             let porId = state.porId;
@@ -71,23 +113,21 @@ const Catalog = ({ route }) => {
             let data = response.data;
 
             if (porId) {
-                var list = new Array()
+                var list = []
 
                 list.push(data);
                 dispatch({ type: 'fetch-finish', data: list, total: 1, pageSize: 10, start: 0 });
             } else {
                 dispatch({ type: 'fetch-finish', data: data.data, total: data.total, pageSize: data.pageSize, start: data.start });
             }
-
-            console.log(state);
         } catch (error) {
             inputEl.current.focus();
 
             if(error.response) {
-                dispatch({ type: 'error', error: error.response.data.message });
+                dispatch({ type: 'fetch-error', error: error.response.data.message });
             }
             else {
-                dispatch({ type: 'error', error: 'Se produjo un error al conectarse al servidor.' })
+                dispatch({ type: 'fetch-error', error: 'Se produjo un error al conectarse al servidor.' });
             }
         }
     };
@@ -96,7 +136,7 @@ const Catalog = ({ route }) => {
         <Box>
         <Box sx={{
             display: 'flex',
-            margin: '48px 64px 0'
+            margin: '36px 64px 0'
           }}
         >
             <Link
@@ -119,7 +159,7 @@ const Catalog = ({ route }) => {
             </Box>
         </Box>
         <Box>
-            <Box sx={{ padding: '2rem 0 0' }}>
+            <Box sx={{ padding: '1rem 0 0' }}>
                 <Box
                     sx={{
                         alignItems: 'center',
@@ -165,8 +205,54 @@ const Catalog = ({ route }) => {
                     </Box>
             </Box>
         </Box>
+        {state.isLoading && (<Box sx={{ alignItems: 'center', display: 'flex', flexDirection: 'column', m: '36px' }}>
+            <CircularProgress />
+        </Box>)}
+        {!state.isLoading && (<Box component="ul" cols={5} sx={{ alignItems: 'center', m: '36px' }}>
+        {state.data.length === 0 && (<Box sx={{textAlign: 'center'}}>No hay información que mostrar</Box>)}
+        {state.data.length > 0 && state.data.map((item, index) => (
+            <Box
+                component="li"
+                key={index}
+                sx={{
+                    display: 'inline-block',
+                    height: '20rem',
+                    listStyleType: 'none',
+                    padding: '0.5rem',
+                    textAlign: 'center',
+                    fontsize: '10px',
+                    width: '10rem'
+                }}
+            >
+                <Box component="img" src={"https://" + item.image} alt={item.description} />
+                <Box><Box component="span" sx={{ fontWeight: 600 }}>{item.brand}</Box> {item.description}</Box>
+                <Badge
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'right',
+                    }}
+                    badgeContent={item.conDescuento ? '50%' : ''}
+                    color="secondary"
+                    invisible={!item.conDescuento}
+                >
+                    <Box sx={{ paddingRight: '24px' }}>${item.price}</Box>
+                </Badge>
+            </Box>
+        ))}
+        </Box>)}
+
         <Box>
-            
+            <Stack spacing={2} sx={{
+                alignItems: 'center',
+                marginTop: '2rem'
+            }}>
+                <Pagination
+                    count={parseInt(state.total / state.pageSize) + 1}
+                    page={parseInt(state.start / state.pageSize) + 1}
+                    onChange={handlePageChange}
+                    color="primary"
+                />
+            </Stack>
         </Box>
         </Box>
     );
