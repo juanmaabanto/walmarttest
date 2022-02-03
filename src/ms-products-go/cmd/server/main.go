@@ -13,6 +13,7 @@ import (
 	"github.com/juanmaabanto/ms-products/internal/service"
 	"github.com/juanmaabanto/ms-products/internal/validations"
 	"github.com/labstack/echo/v4"
+	emiddleware "github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
@@ -60,6 +61,11 @@ func Handler(si ServerInterface, router *echo.Echo) {
 
 	api.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		LoggerErrorFunc: loggerManager.Error,
+	}))
+
+	api.Use(emiddleware.CORSWithConfig(emiddleware.CORSConfig{
+		AllowOrigins: []string{"http://localhost:3000"},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	}))
 
 	//Swagger

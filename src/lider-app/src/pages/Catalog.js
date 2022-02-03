@@ -62,14 +62,22 @@ const Catalog = ({ route }) => {
         dispatch({ type: 'error', error: '' });
 
         try {
+            let porId = state.porId;
             let productApiUrl = 'http://localhost:5500/';
-            let url = state.porId ? `${productApiUrl}api/v1/products/${state.search}`
-                : `${productApiUrl}api/v1/products/?search=${state.search}`;
+            let url = porId ? `${productApiUrl}api/v1/products/${state.search}`
+                : `${productApiUrl}api/v1/products?search=${state.search}&pageSize=${state.pageSize}&start=${state.start}`;
 
             let response = await axios.get(url);
             let data = response.data;
 
-            dispatch({ type: 'fetch-finish', data: data.data, total: data.total, pageSize: data.pageSize, start: data.start });
+            if (porId) {
+                var list = new Array()
+
+                list.push(data);
+                dispatch({ type: 'fetch-finish', data: list, total: 1, pageSize: 10, start: 0 });
+            } else {
+                dispatch({ type: 'fetch-finish', data: data.data, total: data.total, pageSize: data.pageSize, start: data.start });
+            }
 
             console.log(state);
         } catch (error) {
@@ -156,6 +164,9 @@ const Catalog = ({ route }) => {
                         </Button>
                     </Box>
             </Box>
+        </Box>
+        <Box>
+            
         </Box>
         </Box>
     );
