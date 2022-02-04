@@ -100,6 +100,11 @@ func (h HttpServer) GetProduct(c echo.Context) error {
 // @Router /api/v1/products [get]
 func (h HttpServer) ListProduct(c echo.Context) error {
 	searchParam := c.QueryParam("search")
+
+	if len(searchParam) < 3 {
+		panic(errors.NewBadRequestError("Ingrese al menos 3 caracteres para parametro 'search'"))
+	}
+
 	pageSize, err := strconv.Atoi(c.QueryParam("pageSize"))
 
 	if err != nil {
