@@ -1,17 +1,16 @@
 // import { productApiUrl } from '../config';
 import axios from 'axios';
 import React, { useEffect, useReducer, useRef } from 'react';
-import Badge from '@mui/material/Badge';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import CircularProgress from '@mui/material/CircularProgress';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Link from '@mui/material/Link';
-import Pagination from '@mui/material/Pagination';
-import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import Item from '../components/catalog/Item';
+import Footer from '../components/catalog/Footer';
 
 export const initialState = {
     error: '',
@@ -210,50 +209,9 @@ const Catalog = ({ route }) => {
         </Box>)}
         {!state.isLoading && (<Box component="ul" cols={5} sx={{ alignItems: 'center', m: '36px' }}>
         {state.data.length === 0 && (<Box sx={{textAlign: 'center'}}>No hay información que mostrar</Box>)}
-        {state.data.length > 0 && state.data.map((item, index) => (
-            <Box
-                component="li"
-                key={index}
-                sx={{
-                    display: 'inline-block',
-                    height: '20rem',
-                    listStyleType: 'none',
-                    padding: '0.5rem',
-                    textAlign: 'center',
-                    fontsize: '10px',
-                    width: '10rem'
-                }}
-            >
-                <Box component="img" src={"https://" + item.image} alt={item.description} />
-                <Box><Box component="span" sx={{ fontWeight: 600 }}>{item.brand}</Box> {item.description}</Box>
-                <Badge
-                    anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'right',
-                    }}
-                    badgeContent={item.conDescuento ? '50%' : ''}
-                    color="secondary"
-                    invisible={!item.conDescuento}
-                >
-                    <Box sx={{ paddingRight: '24px' }}>${item.price}</Box>
-                </Badge>
-            </Box>
-        ))}
+        {state.data.length > 0 && state.data.map((item, index) => <Item data={item} key={index} />)}
         </Box>)}
-
-        <Box>
-            <Stack spacing={2} sx={{
-                alignItems: 'center',
-                marginTop: '2rem'
-            }}>
-                <Pagination
-                    count={parseInt(state.total / state.pageSize) + 1}
-                    page={parseInt(state.start / state.pageSize) + 1}
-                    onChange={handlePageChange}
-                    color="primary"
-                />
-            </Stack>
-        </Box>
+        <Footer pageSize={state.pageSize} start={state.start} total={state.total} handlePageChange={handlePageChange} />
         </Box>
     );
 };
