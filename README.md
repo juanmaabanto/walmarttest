@@ -1,6 +1,9 @@
 # walmarttest
 Backend desarrollado con Go 1.17, y frontend desarrollado con React JS, BD MongoDB
 
+microservice: src/ms-products-go
+Frontend: src/lider-app
+
 ## Instalación
 
 ### Requisitos
