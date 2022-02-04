@@ -1,8 +1,11 @@
 # walmarttest
 Backend desarrollado con Go 1.17, y frontend desarrollado con React JS, BD MongoDB
 
-microservice: src/ms-products-go
-Frontend: src/lider-app
+- microservice: src/ms-products-go
+- Frontend: src/lider-app
+
+Uso de librería propia para abstraer implementaciones comunes, repositorios genericos, middleware para el logging, etc. dejo enlace del repositorio
+https://github.com/juanmaabanto/go-seedwork
 
 ## Instalación
 
