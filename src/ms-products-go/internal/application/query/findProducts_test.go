@@ -2,57 +2,117 @@ package query
 
 import (
 	"context"
-	"reflect"
+	"errors"
 	"testing"
 
-	"github.com/juanmaabanto/go-seedwork/seedwork/database"
-	"github.com/juanmaabanto/ms-products/internal/application/response"
 	"github.com/juanmaabanto/ms-products/internal/domain/products"
-	"github.com/juanmaabanto/ms-products/internal/infrastructure"
+	"github.com/juanmaabanto/ms-products/internal/tools"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
-func TestFindProductsHandler_Handle(t *testing.T) {
-	mongo_url := "mongodb+srv://root:A123a@develop.oh3sr.mongodb.net/test?retryWrites=true&w=majority"
+func Test_NewFindProductsHandler(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("panic")
+		}
+	}()
 
-	expected := []response.ProductResponse{
-		{
-			Id:           58,
-			Brand:        "daad",
-			Description:  "vangde oswss",
-			Image:        "www.lider.cl/catalogo/images/furnitureIcon.svg",
-			Price:        399362,
-			ConDescuento: true,
-		},
-	}
+	// The following is the code under test
+	NewFindProductsHandler(nil)
+}
 
-	type args struct {
-		query FindProducts
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    int64
-		want1   []response.ProductResponse
-		wantErr bool
-	}{
-		{"Devuelve un registro", args{FindProducts{Search: "daad", Start: 0, PageSize: 1}}, 27, expected, false},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			h := FindProductsHandler{
-				repo: infrastructure.NewProductRepository(database.NewMongoConnection(context.Background(), "test", mongo_url), products.Product{}),
-			}
-			got, got1, err := h.Handle(context.Background(), tt.args.query)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("FindProductsHandler.Handle() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("FindProductsHandler.Handle() got = %v, want %v", got, tt.want)
-			}
-			if !reflect.DeepEqual(got1, tt.want1) {
-				t.Errorf("FindProductsHandler.Handle() got1 = %v, want %v", got1, tt.want1)
-			}
+func Test_Handle_FindProducts_Error_Count(t *testing.T) {
+	// Arrange
+	mockRepo := new(tools.MockRepository)
+	ctx := context.Background()
+
+	mockRepo.On("Count", ctx, mock.AnythingOfType("primitive.D")).Return(int64(0), errors.New("empty name"))
+
+	// Act
+	testQuery := NewFindProductsHandler(mockRepo)
+	_, _, err := testQuery.Handle(ctx, FindProducts{Search: "t", Start: 0, PageSize: 50})
+
+	// Assert
+	mockRepo.AssertExpectations(t)
+
+	assert.NotNil(t, err)
+}
+
+func Test_Handle_FindProducts_Error_Paginated(t *testing.T) {
+	// Arrange
+	mockRepo := new(tools.MockRepository)
+	ctx := context.Background()
+
+	mockRepo.On("Count", ctx, mock.AnythingOfType("primitive.D")).Return(int64(1), nil)
+	mockRepo.On("Paginated", ctx, mock.AnythingOfType("primitive.D"), mock.AnythingOfType("primitive.D"), int64(50), int64(0), mock.AnythingOfType("*[]products.Product")).Return(errors.New("empty name"))
+
+	// Act
+	testQuery := NewFindProductsHandler(mockRepo)
+	_, _, err := testQuery.Handle(ctx, FindProducts{Search: "t", Start: 0, PageSize: 50})
+
+	// Assert
+	mockRepo.AssertExpectations(t)
+
+	assert.NotNil(t, err)
+}
+
+func Test_Handle_FindProducts_With_Palindrome(t *testing.T) {
+	// Arrange
+	mockRepo := new(tools.MockRepository)
+	ctx := context.Background()
+
+	mockRepo.On("Count", ctx, mock.AnythingOfType("primitive.D")).Return(int64(1), nil)
+	mockRepo.On("Paginated", ctx, mock.AnythingOfType("primitive.D"), mock.AnythingOfType("primitive.D"), int64(50), int64(0), mock.AnythingOfType("*[]products.Product")).Return(nil).Run(func(args mock.Arguments) {
+		arg := args.Get(5).(*[]products.Product)
+
+		*arg = append(*arg, products.Product{
+			Brand:       "marca",
+			Description: "description",
+			Image:       "image",
+			Price:       10000,
 		})
-	}
+
+	})
+
+	// Act
+	testQuery := NewFindProductsHandler(mockRepo)
+	total, results, _ := testQuery.Handle(ctx, FindProducts{Search: "daad", Start: 0, PageSize: 50})
+
+	// Assert
+	mockRepo.AssertExpectations(t)
+
+	assert.Equal(t, int64(1), total)
+	assert.Equal(t, int64(5000), results[0].Price)
+	assert.Equal(t, true, results[0].ConDescuento)
+}
+
+func Test_Handle_FindProducts_With_Not_Palindrome(t *testing.T) {
+	// Arrange
+	mockRepo := new(tools.MockRepository)
+	ctx := context.Background()
+
+	mockRepo.On("Count", ctx, mock.AnythingOfType("primitive.D")).Return(int64(1), nil)
+	mockRepo.On("Paginated", ctx, mock.AnythingOfType("primitive.D"), mock.AnythingOfType("primitive.D"), int64(50), int64(0), mock.AnythingOfType("*[]products.Product")).Return(nil).Run(func(args mock.Arguments) {
+		arg := args.Get(5).(*[]products.Product)
+
+		*arg = append(*arg, products.Product{
+			Brand:       "marca",
+			Description: "description",
+			Image:       "image",
+			Price:       10000,
+		})
+
+	})
+
+	// Act
+	testQuery := NewFindProductsHandler(mockRepo)
+	total, results, _ := testQuery.Handle(ctx, FindProducts{Search: "daa", Start: 0, PageSize: 50})
+
+	// Assert
+	mockRepo.AssertExpectations(t)
+
+	assert.Equal(t, int64(1), total)
+	assert.Equal(t, int64(10000), results[0].Price)
+	assert.Equal(t, false, results[0].ConDescuento)
 }

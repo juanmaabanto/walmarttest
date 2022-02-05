@@ -57,7 +57,7 @@ func (mock *MockRepository) InsertOne(ctx context.Context, document interface{})
 }
 
 func (mock *MockRepository) Paginated(ctx context.Context, filter interface{}, sort interface{}, pageSize int64, start int64, receiver interface{}) error {
-	args := mock.Called()
+	args := mock.Called(ctx, filter, sort, pageSize, start, receiver)
 
 	return args.Error(0)
 }
