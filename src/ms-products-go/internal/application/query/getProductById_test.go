@@ -12,6 +12,17 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+func Test_NewGetProductByIdHandler(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("panic")
+		}
+	}()
+
+	// The following is the code under test
+	NewGetProductByIdHandler(nil)
+}
+
 func Test_Handle_GetProductById_Palindrome(t *testing.T) {
 	// Arrange
 	mockRepo := new(tools.MockRepository)
