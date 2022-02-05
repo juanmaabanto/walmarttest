@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/juanmaabanto/ms-products/internal/application/response"
-	"github.com/juanmaabanto/ms-products/internal/application/tools"
 	"github.com/juanmaabanto/ms-products/internal/domain/products"
+	"github.com/juanmaabanto/ms-products/internal/tools"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
