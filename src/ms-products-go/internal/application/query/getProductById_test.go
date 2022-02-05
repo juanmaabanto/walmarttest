@@ -2,51 +2,41 @@ package query
 
 import (
 	"context"
-	"reflect"
 	"testing"
 
-	"github.com/juanmaabanto/go-seedwork/seedwork/database"
 	"github.com/juanmaabanto/ms-products/internal/application/response"
+	"github.com/juanmaabanto/ms-products/internal/application/tools"
 	"github.com/juanmaabanto/ms-products/internal/domain/products"
-	"github.com/juanmaabanto/ms-products/internal/infrastructure"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
-func TestGetProductByIdHandler_Handle(t *testing.T) {
-	mongo_url := "mongodb+srv://root:A123a@develop.oh3sr.mongodb.net/test?retryWrites=true&w=majority"
-	expected := &response.ProductResponse{
-		Id:           100,
-		Brand:        "qeiydij",
-		Description:  "cxzbz lahbhe",
-		Image:        "www.lider.cl/catalogo/images/computerIcon.svg",
-		Price:        756530,
-		ConDescuento: false,
-	}
+func TestGetProductById(t *testing.T) {
+	// Arrange
+	mockRepo := new(tools.MockRepository)
+	ctx := context.Background()
+	expected := response.ProductResponse{Id: 1, Brand: "marca", Description: "description", Image: "http://image.com", Price: 5000, ConDescuento: true}
 
-	type args struct {
-		query GetProductById
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    *response.ProductResponse
-		wantErr bool
-	}{
-		{"Buscar Id", args{query: GetProductById{100}}, expected, false},
-		{"Error cuando no encuentra Id", args{query: GetProductById{132300}}, nil, true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			h := GetProductByIdHandler{
-				repo: infrastructure.NewProductRepository(database.NewMongoConnection(context.Background(), "test", mongo_url), products.Product{}),
-			}
-			got, err := h.Handle(context.Background(), tt.args.query)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetProductByIdHandler.Handle() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if tt.wantErr && !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetProductByIdHandler.Handle() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	mockRepo.On("FindById", ctx, int64(1), mock.AnythingOfType("*products.Product")).Return(nil).Run(func(args mock.Arguments) {
+		arg := args.Get(2).(*products.Product)
+		arg.Id = 1
+		arg.Brand = "marca"
+		arg.Description = "description"
+		arg.Image = "http://image.com"
+		arg.Price = 10000
+	})
+
+	// Act
+	testQuery := NewGetProductByIdHandler(mockRepo)
+	result, _ := testQuery.Handle(ctx, GetProductById{Id: 1})
+
+	// Assert
+	mockRepo.AssertExpectations(t)
+
+	assert.Equal(t, expected.Id, result.Id)
+	assert.Equal(t, expected.Brand, result.Brand)
+	assert.Equal(t, expected.Description, result.Description)
+	assert.Equal(t, expected.Image, result.Image)
+	assert.Equal(t, expected.Price, result.Price)
+	assert.Equal(t, expected.ConDescuento, result.ConDescuento)
 }
