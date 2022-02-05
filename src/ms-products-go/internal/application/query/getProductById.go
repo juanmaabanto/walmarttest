@@ -6,8 +6,8 @@ import (
 
 	"github.com/juanmaabanto/go-seedwork/seedwork/errors"
 	"github.com/juanmaabanto/ms-products/internal/application/response"
-	"github.com/juanmaabanto/ms-products/internal/application/tools"
 	"github.com/juanmaabanto/ms-products/internal/domain/products"
+	"github.com/juanmaabanto/ms-products/internal/tools"
 )
 
 type GetProductById struct {
