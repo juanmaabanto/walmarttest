@@ -1,5 +1,5 @@
 # walmarttest
-Backend desarrollado con Go 1.17, y frontend desarrollado con React JS, BD MongoDB
+Backend desarrollado con Go 1.17, y frontend desarrollado con React JS, MongoDB, Clean Architecture con CQRS
 
 - microservice: src/ms-products-go
 - Frontend: src/lider-app
@@ -45,5 +45,8 @@ cd src/ms-products-go
 go mod tidy
 
 // ejecutar pruebas
-go test ./internal/application/... -v 
+go test ./internal/application/... -v
+
+// cobertura de pruebas
+go test ./internal/application/... -cover
 ```
